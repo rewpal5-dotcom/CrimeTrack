@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CrimeTrack — Mobile App Design (Prototype)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#070a09;
+  --screen:#0b100e;
+  --screen-2:#0e1412;
+  --surface:#141b18;
+  --surface-2:#18201d;
+  --surface-3:#1d2622;
+  --line:rgba(255,255,255,.07);
+  --line-2:rgba(255,255,255,.12);
+  --text:#f3f7f5;
+  --dim:#8d9a94;
+  --dim-2:#66736d;
+  --green:#22c55e;
+  --green-2:#4ade80;
+  --green-ink:#052e14;
+  --tile-green:#16341f;
+  --tile-amber:#3a2a12;
+  --tile-teal:#12312f;
+  --tile-blue:#152a3d;
+  --tile-violet:#251c3a;
+  --tile-red:#3a1a1a;
+  --amber:#f0a83c;
+  --teal:#37c9b0;
+  --blue:#4a9bea;
+  --violet:#9b8bf0;
+  --red:#ef6b5e;
+  --font:'Plus Jakarta Sans',-apple-system,'Segoe UI',sans-serif;
+  --mono:'Azeret Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:
+    radial-gradient(900px 500px at 18% -10%, rgba(34,197,94,.10), transparent 60%),
+    radial-gradient(700px 420px at 92% 8%, rgba(34,197,94,.05), transparent 60%),
+    var(--page);
+  color:var(--text);
+  font-family:var(--font);
+  -webkit-font-smoothing:antialiased;
+  padding:44px 20px 56px;
+}
+.sheet-head{max-width:1240px;margin:0 auto 34px;text-align:center}
+.eyebrow{
+  font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--green-2);margin:0 0 12px
+}
+.sheet-head h1{
+  font-size:clamp(22px,3.4vw,38px);font-weight:800;letter-spacing:-.02em;margin:0 0 10px;line-height:1.15
+}
+.sheet-head h1 span{color:var(--green)}
+.sheet-head p{margin:0;color:var(--dim);font-size:13.5px}
+.screens{
+  max-width:1240px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,390px));
+  gap:30px 28px;justify-content:center;align-items:start;
+}
+.phone{
+  width:100%;max-width:390px;height:812px;margin:0 auto;
+  background:var(--screen);
+  border:9px solid #1b2320;
+  border-radius:46px;
+  box-shadow:0 30px 70px -30px rgba(0,0,0,.9), inset 0 0 0 1px rgba(255,255,255,.04);
+  overflow:hidden;display:flex;flex-direction:column;position:relative;
+  animation:fadeUp .6s ease both;
+}
+.phone:nth-child(2){animation-delay:.06s}
+.phone:nth-child(3){animation-delay:.12s}
+.phone:nth-child(4){animation-delay:.18s}
+.phone:nth-child(5){animation-delay:.24s}
+.phone:nth-child(6){animation-delay:.3s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.phone{animation:none}}
+
+/* status bar */
+.sbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 22px 6px;font-family:var(--mono);font-size:11px;color:#cfd8d4;flex:none
+}
+.sbar .r{display:flex;align-items:center;gap:5px}
+.sbar svg{display:block}
+
+/* generic icon */
+.ic{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.sm{width:16px;height:16px}
+.ic.xs{width:13px;height:13px}
+.ic.lg{width:24px;height:24px}
+
+/* top bar */
+.topbar{
+  display:flex;align-items:center;gap:12px;padding:6px 20px 14px;flex:none
+}
+.topbar h2{font-size:16px;font-weight:700;margin:0;flex:1;text-align:center;letter-spacing:-.01em}
+.topbar .side{width:26px;display:flex;align-items:center;justify-content:center;color:var(--text)}
+.topbar .shield{color:var(--green)}
+
+.body{flex:1;overflow:hidden;padding:0 20px 8px;display:flex;flex-direction:column;min-height:0}
+
+/* bottom nav */
+.nav{
+  flex:none;display:grid;grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--line);padding:10px 6px 16px;background:rgba(255,255,255,.015)
+}
+.nav a{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  color:var(--dim-2);text-decoration:none;font-size:9.5px;font-weight:600;letter-spacing:.01em
+}
+.nav a.on{color:var(--green)}
+.nav a .ic{width:19px;height:19px}
+
+/* ============ screen 1 ============ */
+.s1{display:flex;flex-direction:column;height:100%;padding-top:10px}
+.s1 h1{
+  font-size:33px;line-height:1.1;font-weight:800;letter-spacing:-.03em;text-align:center;margin:14px 0 0
+}
+.s1 h1 span{color:var(--green)}
+.s1 .tag{text-align:center;color:var(--dim);font-size:12px;margin:10px auto 0;max-width:250px;line-height:1.5}
+.hero{flex:1;position:relative;display:flex;align-items:center;justify-content:center;margin:6px 0}
+.hero .halo{
+  position:absolute;width:250px;height:250px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,197,94,.14),transparent 68%)
+}
+.device{
+  position:relative;width:132px;height:206px;border-radius:20px;
+  border:1.5px solid rgba(255,255,255,.14);
+  background:linear-gradient(180deg,#111917,#0c1210);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 24px 50px -22px rgba(0,0,0,.9)
+}
+.device::before{
+  content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);
+  width:26px;height:3px;border-radius:3px;background:rgba(255,255,255,.16)
+}
+.device .lens{color:var(--green);width:58px;height:58px;stroke-width:2.4;filter:drop-shadow(0 0 12px rgba(34,197,94,.45))}
+.chip{
+  position:absolute;width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(255,255,255,.08)
+}
+.chip .ic{width:15px;height:15px;stroke-width:2}
+.c1{left:6px;top:38px;background:var(--tile-green);color:var(--green-2)}
+.c2{right:2px;top:52px;background:#2c1d3f;color:var(--violet)}
+.c3{left:2px;top:112px;background:var(--tile-blue);color:var(--blue)}
+.c4{right:8px;top:126px;background:#3a2410;color:var(--amber)}
+.c5{right:34px;top:186px;background:var(--tile-green);color:var(--green-2)}
+.searchrow{
+  display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:6px 6px 6px 0;margin-bottom:14px
+}
+.searchrow .cc{
+  padding:0 12px;font-size:13px;color:var(--text);border-right:1px solid var(--line);font-weight:600
+}
+.searchrow .ph{flex:1;font-size:12.5px;color:var(--dim-2);min-width:0}
+.btn-ic{
+  width:40px;height:40px;border-radius:11px;background:var(--green);color:var(--green-ink);
+  display:flex;align-items:center;justify-content:center;flex:none
+}
+.btn-ic .ic{width:18px;height:18px;stroke-width:2.4}
+.safe{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--dim-2);font-size:11px;margin-bottom:6px}
+
+/* ============ shared bits ============ */
+.searchbar{
+  display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:6px;margin-bottom:16px
+}
+.searchbar .val{flex:1;font-size:13px;font-weight:600;padding-left:8px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.h-sec{font-size:13.5px;font-weight:700;margin:0 0 10px;letter-spacing:-.01em}
+.profile{
+  display:flex;align-items:center;gap:13px;background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;padding:14px;margin-bottom:14px
+}
+.av{
+  width:52px;height:52px;border-radius:50%;background:linear-gradient(160deg,#1d3f2a,#12281c);
+  color:var(--green-2);display:flex;align-items:center;justify-content:center;flex:none;border:1px solid rgba(74,222,128,.18)
+}
+.av .ic{width:26px;height:26px;stroke-width:1.7}
+.av.mono-green{background:linear-gradient(160deg,#1b3d28,#0f2418)}
+.av.p1{background:linear-gradient(160deg,#3a2b12,#241a0c);color:var(--amber);font-weight:700;font-size:15px}
+.av.p2{background:linear-gradient(160deg,#3a1c1c,#241010);color:var(--red);font-weight:700;font-size:15px}
+.av.p3{background:linear-gradient(160deg,#152a3d,#0d1a26);color:var(--blue);font-weight:700;font-size:15px}
+.av.p4{background:linear-gradient(160deg,#2a2438,#171322);color:var(--violet);font-weight:700;font-size:15px}
+.profile .nm{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:700;letter-spacing:-.01em}
+.profile .nm .ic{width:14px;height:14px;color:var(--green);stroke-width:2.6}
+.profile .num{font-size:12px;color:#c6d0cb;margin-top:3px;font-weight:600}
+.profile .loc{font-size:11px;color:var(--dim);margin-top:3px}
+.pill{
+  display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:3px 10px;border-radius:999px;
+  background:rgba(34,197,94,.14);color:var(--green-2);font-size:10px;font-weight:700;letter-spacing:.03em
+}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.tile{
+  display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:10px 9px;min-width:0
+}
+.tile .ib{width:29px;height:29px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex:none}
+.tile .ib .ic{width:14px;height:14px;stroke-width:2}
+.tile .tx{display:block;min-width:0}
+.tile .k{display:block;font-size:9px;color:var(--dim);letter-spacing:.02em;line-height:1.2}
+.tile .v{display:block;font-size:10.5px;font-weight:600;margin-top:2px;line-height:1.3;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib.g{background:var(--tile-green);color:var(--green-2)}
+.ib.a{background:var(--tile-amber);color:var(--amber)}
+.ib.t{background:var(--tile-teal);color:var(--teal)}
+.ib.b{background:var(--tile-blue);color:var(--blue)}
+.ib.v{background:var(--tile-violet);color:var(--violet)}
+.ib.r{background:var(--tile-red);color:var(--red)}
+.green-t{color:var(--green-2)}
+.red-t{color:var(--red)}
+
+/* tabs */
+.tabs{display:flex;gap:20px;border-bottom:1px solid var(--line);margin-bottom:4px;flex:none}
+.tabs button{
+  background:none;border:0;padding:0 0 9px;font-family:var(--font);font-size:12px;font-weight:600;
+  color:var(--dim);position:relative;cursor:default
+}
+.tabs button.on{color:var(--text)}
+.tabs button.on::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;border-radius:3px;background:var(--green)
+}
+
+/* rows */
+.rows{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;justify-content:space-evenly;padding-bottom:8px}
+.row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:7.5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:11.5px
+}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--dim)}
+.row .v{font-weight:600;text-align:right;color:var(--text)}
+.row .v.green{color:var(--green-2)}
+
+/* list rows (more info / history) */
+.lrow{
+  display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:9px 11px;margin-bottom:8px;min-width:0
+}
+.lrow .ib{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex:none}
+.lrow .ib .ic{width:15px;height:15px;stroke-width:2}
+.lrow .tx{display:block;flex:1;min-width:0}
+.lrow .t{display:block;font-size:11.5px;font-weight:600;line-height:1.25}
+.lrow .s{display:block;font-size:10px;color:var(--dim);margin-top:2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .ch{color:var(--dim-2)}
+.lrow .ch .ic{width:14px;height:14px;stroke-width:2.2}
+
+.spread{gap:7px;padding-bottom:16px}
+.spread .lrow{flex:1;margin-bottom:0;padding:8px 11px}
+.btn-primary{
+  display:flex;align-items:center;justify-content:center;height:44px;border-radius:12px;
+  background:var(--green);color:#04240f;font-weight:800;font-size:12.5px;letter-spacing:.01em;
+  margin-top:auto;flex:none;text-decoration:none
+}
+
+/* history */
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.seg div{
+  text-align:center;padding:8px 0;border-radius:10px;background:var(--surface);border:1px solid var(--line);
+  font-size:11px;font-weight:600;color:#b9c4bf
+}
+.seg div.on{background:var(--green);color:#04240f;border-color:transparent;font-weight:800}
+.hrow{
+  display:flex;align-items:center;gap:11px;background:var(--surface);border:1px solid var(--line);
+  border-radius:13px;padding:9px 11px;margin-bottom:9px;min-width:0
+}
+.hrow .av{width:34px;height:34px;font-size:12px}
+.hrow .av .ic{width:17px;height:17px}
+.hrow .tx{display:block;flex:1;min-width:0}
+.hrow .n{display:block;font-size:11.5px;font-weight:700;line-height:1.3}
+.hrow .s{display:block;font-size:10px;color:var(--dim);margin-top:2px}
+.hrow .when{font-size:9.5px;color:var(--dim-2);text-align:right;white-space:nowrap}
+.hrow.unk .n{color:#cfd8d4;font-weight:600}
+
+/* premium */
+.prem{
+  position:relative;background:linear-gradient(150deg,#141c19,#101614);border:1px solid var(--line);
+  border-radius:16px;padding:16px;margin-bottom:16px;overflow:hidden
+}
+.prem h3{margin:0;font-size:19px;font-weight:800;letter-spacing:-.02em}
+.prem p{margin:8px 0 16px;font-size:10.5px;color:var(--dim);line-height:1.55;max-width:62%}
+.prem .gem{position:absolute;right:12px;top:34px;width:74px;height:74px}
+.prem .up{
+  display:flex;align-items:center;justify-content:center;height:38px;border-radius:10px;
+  background:var(--green);color:#04240f;font-size:11.5px;font-weight:800;max-width:200px
+}
+.feats{display:flex;flex-direction:column;gap:11px}
+.feat{display:flex;align-items:center;gap:9px;font-size:11px;color:#dbe3df}
+.feat .ck{
+  width:16px;height:16px;border-radius:5px;background:rgba(34,197,94,.16);color:var(--green-2);
+  display:flex;align-items:center;justify-content:center;flex:none
+}
+.feat .ck .ic{width:10px;height:10px;stroke-width:3.2}
+
+.foot{max-width:1240px;margin:38px auto 0;text-align:center;color:var(--dim-2);font-size:11.5px;line-height:1.6}
+.foot code{font-family:var(--mono);color:var(--dim);font-size:10.5px}
+@media (max-width:480px){
+  body{padding:26px 12px 40px}
+  .phone{height:760px;border-radius:38px;border-width:7px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.6V20a1 1 0 0 0 1 1H9.5v-6h5v6H17.5a1 1 0 0 0 1-1V9.6"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.4V12l3.2 2"/></symbol>
+<symbol id="i-crown" viewBox="0 0 24 24"><path d="M4 18.5 2.8 7.8l4.9 3.4L12 4.6l4.3 6.6 4.9-3.4L20 18.5z"/><path d="M4 18.5h16"/></symbol>
+<symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.6"/><path d="M15.8 15.8 20.6 20.6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.6" y="10.4" width="14.8" height="10.2" rx="2.6"/><path d="M8.2 10.4V7.9a3.8 3.8 0 0 1 7.6 0v2.5"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M20 12H4.6"/><path d="M10.6 5.2 3.8 12l6.8 6.8"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2.9 19.2 6v6.1c0 4.3-3 7.6-7.2 9.1-4.2-1.5-7.2-4.8-7.2-9.1V6z"/><path d="M8.9 11.9l2.2 2.2 4.1-4.2"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 4.8 16.2 12 9 19.2"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.7"/><path d="M4.6 20.2c1.3-3.6 4-5.4 7.4-5.4s6.1 1.8 7.4 5.4"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5.6" width="18" height="12.8" rx="2.6"/><path d="M4.2 7.6 12 13.1l7.8-5.5"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M6.4 3.4h3l1.6 4.1-2.1 1.5a11.4 11.4 0 0 0 5.1 5.1l1.5-2.1 4.1 1.6v3a2.1 2.1 0 0 1-2.3 2.1A16.6 16.6 0 0 1 4.3 5.7a2.1 2.1 0 0 1 2.1-2.3z"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6.6-6.2 6.6-10.7A6.6 6.6 0 0 0 5.4 10.3C5.4 14.8 12 21 12 21z"/><circle cx="12" cy="10.3" r="2.4"/></symbol>
+<symbol id="i-sim" viewBox="0 0 24 24"><rect x="5.2" y="2.9" width="13.6" height="18.2" rx="2.6"/><path d="M9.4 8.4h5.2M9.4 12h5.2"/></symbol>
+<symbol id="i-signal" viewBox="0 0 24 24"><path d="M5 20v-5M10 20V10M15 20V5.5M20 20v-2.5"/></symbol>
+<symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 3.4a8.6 8.6 0 0 0-7.4 12.9L3.4 20.6l4.4-1.1A8.6 8.6 0 1 0 12 3.4z"/><path d="M8.9 9.2c0 3.1 2.6 5.7 5.7 5.7"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.6 20.9 20H3.1z"/><path d="M12 9.4v4.8M12 17.1v.1"/></symbol>
+<symbol id="i-caller" viewBox="0 0 24 24"><path d="M6.4 3.4h3l1.6 4.1-2.1 1.5a11.4 11.4 0 0 0 5.1 5.1l1.5-2.1 4.1 1.6v3a2.1 2.1 0 0 1-2.3 2.1A16.6 16.6 0 0 1 4.3 5.7a2.1 2.1 0 0 1 2.1-2.3z"/><path d="M15.4 3.6h5v5"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M4.6 12.4 9.6 17.4 20 6.6"/></symbol>
+<symbol id="i-hash" viewBox="0 0 24 24"><path d="M9.6 3.6 7.6 20.4M16.4 3.6l-2 16.8M4 8.6h16M3 15.4h16"/></symbol>
+<symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.2" r="3.3"/><path d="M3 19.2c.9-3 3.1-4.7 6-4.7s5.1 1.7 6 4.7"/><path d="M16 5.4a3.3 3.3 0 0 1 0 5.7"/><path d="M17.6 14.8c2 .6 3.3 2 4 4.4"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><circle cx="17.6" cy="5.6" r="2.6"/><circle cx="6.4" cy="12" r="2.6"/><circle cx="17.6" cy="18.4" r="2.6"/><path d="M8.7 10.7 15.3 7M8.7 13.3 15.3 17"/></symbol>
+<symbol id="i-building" viewBox="0 0 24 24"><rect x="5" y="2.9" width="14" height="18.2" rx="1.8"/><path d="M9 7h2M13 7h2M9 11h2M13 11h2M9 15h2M13 15h2"/></symbol>
+<symbol id="i-school" viewBox="0 0 24 24"><path d="M2.8 9.4 12 4.4l9.2 5-9.2 5z"/><path d="M6.4 11.6V16c0 1.7 2.5 3.1 5.6 3.1s5.6-1.4 5.6-3.1v-4.4"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M4 16.4v-3.2l1.9-4.4a2 2 0 0 1 1.9-1.3h8.4a2 2 0 0 1 1.9 1.3l1.9 4.4v3.2"/><path d="M4 13.2h16"/><circle cx="7.6" cy="16.6" r="1.7"/><circle cx="16.4" cy="16.6" r="1.7"/></symbol>
+<symbol id="i-vote" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2.6"/><path d="M8.4 12.1l2.5 2.5 4.7-5.1"/></symbol>
+<symbol id="i-id" viewBox="0 0 24 24"><rect x="2.9" y="4.8" width="18.2" height="14.4" rx="2.6"/><circle cx="8.6" cy="10.9" r="2"/><path d="M5.6 16.2c.6-1.7 1.7-2.4 3-2.4s2.4.7 3 2.4"/><path d="M14.2 10h4.1M14.2 13.6h4.1"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4l10.2-10.2-4-4L4 16z"/><path d="M14.4 5.6l4 4"/></symbol>
+<symbol id="i-report" viewBox="0 0 24 24"><path d="M6 3h8l5 5v13H6z"/><path d="M14 3v5h5"/><path d="M9.4 13h5.2M9.4 16.6h3.4"/></symbol>
+</defs></svg>
+
+<header class="sheet-head">
+  <p class="eyebrow">CrimeTrack &middot; Mobile App Design (Prototype)</p>
+  <h1>Crime<span>Track</span> &mdash; Mobile App Design</h1>
+  <p>Six screens &middot; dark interface &middot; green accent &middot; 390 &times; 812</p>
+</header>
+
+<main class="screens">
+
+  <!-- ============ 01 · HOME / SEARCH ============ -->
+  <section class="phone">
+    <div class="sbar"><span>9:41</span><span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.6" width="3" height="8.4" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.6a9.6 9.6 0 0 1 13 0"/><path d="M3.4 6.2a6 6 0 0 1 8.2 0"/><path d="M5.8 8.7a2.5 2.5 0 0 1 3.4 0"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11" fill="none"><rect x=".6" y=".6" width="18.8" height="9.8" rx="2.6" stroke="currentColor" stroke-opacity=".55"/><rect x="2.4" y="2.4" width="13.6" height="6.2" rx="1.6" fill="currentColor"/><path d="M21 4.2v2.6c1.2-.3 1.2-2.3 0-2.6z" fill="currentColor" fill-opacity=".6"/></svg>
+    </span></div>
+
+    <div class="body">
+      <div class="s1">
+        <h1>Crime<span>Track</span></h1>
+        <p class="tag">Find information about any mobile number</p>
+
+        <div class="hero">
+          <div class="halo"></div>
+          <div class="device">
+            <svg class="ic lens" viewBox="0 0 24 24"><circle cx="10.6" cy="10.6" r="6.2"/><path d="M15.2 15.2 21 21"/></svg>
+          </div>
+          <span class="chip c1"><svg class="ic"><use href="#i-user"/></svg></span>
+          <span class="chip c2"><svg class="ic"><use href="#i-mail"/></svg></span>
+          <span class="chip c3"><svg class="ic"><use href="#i-phone"/></svg></span>
+          <span class="chip c4"><svg class="ic"><use href="#i-mail"/></svg></span>
+          <span class="chip c5"><svg class="ic"><use href="#i-pin"/></svg></span>
+        </div>
+
+        <div class="searchrow">
+          <span class="cc">+91</span>
+          <span class="ph">Enter mobile number</span>
+          <span class="btn-ic"><svg class="ic"><use href="#i-search"/></svg></span>
+        </div>
+        <p class="safe"><svg class="ic xs"><use href="#i-lock"/></svg> Your search is 100% secure</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="on" href="#"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+      <a href="#"><svg class="ic"><use href="#i-clock"/></svg>History</a>
+      <a href="#"><svg class="ic"><use href="#i-crown"/></svg>Premium</a>
+      <a href="#"><svg class="ic"><use href="#i-gear"/></svg>Settings</a>
+    </nav>
+  </section>
+
+  <!-- ============ 02 · QUICK OVERVIEW ============ -->
+  <section class="phone">
+    <div class="sbar"><span>9:41</span><span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.6" width="3" height="8.4" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.6a9.6 9.6 0 0 1 13 0"/><path d="M3.4 6.2a6 6 0 0 1 8.2 0"/><path d="M5.8 8.7a2.5 2.5 0 0 1 3.4 0"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11" fill="none"><rect x=".6" y=".6" width="18.8" height="9.8" rx="2.6" stroke="currentColor" stroke-opacity=".55"/><rect x="2.4" y="2.4" width="13.6" height="6.2" rx="1.6" fill="currentColor"/><path d="M21 4.2v2.6c1.2-.3 1.2-2.3 0-2.6z" fill="currentColor" fill-opacity=".6"/></svg>
+    </span></div>
+
+    <div class="topbar">
+      <span class="side"><svg class="ic"><use href="#i-menu"/></svg></span>
+      <h2>CrimeTrack</h2>
+      <span class="side shield"><svg class="ic"><use href="#i-shield"/></svg></span>
+    </div>
+
+    <div class="body">
+      <div class="searchbar">
+        <span class="val">+91 98765 43210</span>
+        <span class="btn-ic"><svg class="ic"><use href="#i-search"/></svg></span>
+      </div>
+
+      <p class="h-sec">Quick Overview</p>
+
+      <div class="profile">
+        <span class="av"><svg class="ic"><use href="#i-user"/></svg></span>
+        <div>
+          <div class="nm">Amit Kumar <svg class="ic"><use href="#i-check"/></svg></div>
+          <div class="num">+91 98765 43210</div>
+          <div class="loc">Jio &middot; Uttar Pradesh, India</div>
+        </div>
+      </div>
+
+      <div class="tiles">
+        <div class="tile"><span class="ib g"><svg class="ic"><use href="#i-user"/></svg></span><span class="tx"><span class="k">Name</span><span class="v">Amit Kumar</span></span></div>
+        <div class="tile"><span class="ib a"><svg class="ic"><use href="#i-mail"/></svg></span><span class="tx"><span class="k">Email</span><span class="v">amitk***@gmail.com</span></span></div>
+        <div class="tile"><span class="ib t"><svg class="ic"><use href="#i-pin"/></svg></span><span class="tx"><span class="k">Location</span><span class="v">Uttar Pradesh, India</span></span></div>
+        <div class="tile"><span class="ib v"><svg class="ic"><use href="#i-signal"/></svg></span><span class="tx"><span class="k">Operator</span><span class="v">Jio</span></span></div>
+        <div class="tile"><span class="ib b"><svg class="ic"><use href="#i-sim"/></svg></span><span class="tx"><span class="k">Circle</span><span class="v">UP (East)</span></span></div>
+        <div class="tile"><span class="ib g"><svg class="ic"><use href="#i-wa"/></svg></span><span class="tx"><span class="k">WhatsApp</span><span class="v green-t">Available</span></span></div>
+        <div class="tile"><span class="ib r"><svg class="ic"><use href="#i-alert"/></svg></span><span class="tx"><span class="k">Risk Score</span><span class="v">Low Risk</span></span></div>
+        <div class="tile"><span class="ib r"><svg class="ic"><use href="#i-caller"/></svg></span><span class="tx"><span class="k">Caller ID</span><span class="v">Amit Kumar</span></span></div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a class="on" href="#"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+      <a href="#"><svg class="ic"><use href="#i-clock"/></svg>History</a>
+      <a href="#"><svg class="ic"><use href="#i-crown"/></svg>Premium</a>
+      <a href="#"><svg class="ic"><use href="#i-gear"/></svg>Settings</a>
+    </nav>
+  </section>
+
+  <!-- ============ 03 · NUMBER DETAILS ============ -->
+  <section class="phone">
+    <div class="sbar"><span>9:41</span><span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.6" width="3" height="8.4" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.6a9.6 9.6 0 0 1 13 0"/><path d="M3.4 6.2a6 6 0 0 1 8.2 0"/><path d="M5.8 8.7a2.5 2.5 0 0 1 3.4 0"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11" fill="none"><rect x=".6" y=".6" width="18.8" height="9.8" rx="2.6" stroke="currentColor" stroke-opacity=".55"/><rect x="2.4" y="2.4" width="13.6" height="6.2" rx="1.6" fill="currentColor"/><path d="M21 4.2v2.6c1.2-.3 1.2-2.3 0-2.6z" fill="currentColor" fill-opacity=".6"/></svg>
+    </span></div>
+
+    <div class="topbar">
+      <span class="side"><svg class="ic"><use href="#i-back"/></svg></span>
+      <h2>Number Details</h2>
+      <span class="side shield"><svg class="ic"><use href="#i-shield"/></svg></span>
+    </div>
+
+    <div class="body">
+      <div class="profile" style="margin-bottom:12px">
+        <span class="av"><svg class="ic"><use href="#i-user"/></svg></span>
+        <div>
+          <div class="nm">Amit Kumar <svg class="ic"><use href="#i-check"/></svg></div>
+          <div class="num">+91 98765 43210</div>
+          <div class="loc">Jio &middot; Uttar Pradesh, India</div>
+          <span class="pill">Active</span>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="on">Overview</button>
+        <button>More Info</button>
+        <button>Activity</button>
+      </div>
+
+      <div class="rows">
+        <div class="row"><span class="k">Full Name</span><span class="v">Amit Kumar</span></div>
+        <div class="row"><span class="k">Mobile Number</span><span class="v">+91 98765 43210</span></div>
+        <div class="row"><span class="k">Email ID</span><span class="v">amitk***@gmail.com</span></div>
+        <div class="row"><span class="k">Location</span><span class="v">Lucknow, Uttar Pradesh</span></div>
+        <div class="row"><span class="k">Operator</span><span class="v">Jio</span></div>
+        <div class="row"><span class="k">Circle</span><span class="v">UP (East)</span></div>
+        <div class="row"><span class="k">WhatsApp</span><span class="v green">Available</span></div>
+        <div class="row"><span class="k">Risk Score</span><span class="v green">Low Risk</span></div>
+        <div class="row"><span class="k">Caller ID</span><span class="v">Amit Kumar</span></div>
+        <div class="row"><span class="k">Reports</span><span class="v">12 Reports</span></div>
+        <div class="row"><span class="k">Last Seen</span><span class="v">Today</span></div>
+      </div>
+
+      <a class="btn-primary" href="#">Save to Contacts</a>
+    </div>
+  </section>
+
+  <!-- ============ 04 · HISTORY ============ -->
+  <section class="phone">
+    <div class="sbar"><span>9:41</span><span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.6" width="3" height="8.4" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.6a9.6 9.6 0 0 1 13 0"/><path d="M3.4 6.2a6 6 0 0 1 8.2 0"/><path d="M5.8 8.7a2.5 2.5 0 0 1 3.4 0"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11" fill="none"><rect x=".6" y=".6" width="18.8" height="9.8" rx="2.6" stroke="currentColor" stroke-opacity=".55"/><rect x="2.4" y="2.4" width="13.6" height="6.2" rx="1.6" fill="currentColor"/><path d="M21 4.2v2.6c1.2-.3 1.2-2.3 0-2.6z" fill="currentColor" fill-opacity=".6"/></svg>
+    </span></div>
+
+    <div class="topbar" style="padding-bottom:12px">
+      <span class="side"></span>
+      <h2>History</h2>
+      <span class="side" style="width:auto;color:var(--green);font-size:11.5px;font-weight:700">Edit</span>
+    </div>
+
+    <div class="body">
+      <div class="seg">
+        <div class="on">All</div><div>Viewed</div><div>Saved</div>
+      </div>
+
+      <div class="hrow">
+        <span class="av mono-green"><svg class="ic"><use href="#i-user"/></svg></span>
+        <span class="tx"><span class="n">+91 98765 43210</span><span class="s">Amit Kumar</span></span>
+        <span class="when">Today, 10:30 AM</span>
+      </div>
+      <div class="hrow">
+        <span class="av p1">RS</span>
+        <span class="tx"><span class="n">+91 91234 56789</span><span class="s">Rahul Singh</span></span>
+        <span class="when">Today, 09:15 AM</span>
+      </div>
+      <div class="hrow">
+        <span class="av p2">NS</span>
+        <span class="tx"><span class="n">+91 99887 76655</span><span class="s">Neha Sharma</span></span>
+        <span class="when">Yesterday, 08:20 PM</span>
+      </div>
+      <div class="hrow">
+        <span class="av p3">VV</span>
+        <span class="tx"><span class="n">+91 90000 11111</span><span class="s">Vikram Verma</span></span>
+        <span class="when">Yesterday, 05:45 PM</span>
+      </div>
+      <div class="hrow unk">
+        <span class="av p4"><svg class="ic"><use href="#i-user"/></svg></span>
+        <span class="tx"><span class="n">+91 78259 65412</span><span class="s">Unknown</span></span>
+        <span class="when">20 May 2024</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="#"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+      <a class="on" href="#"><svg class="ic"><use href="#i-clock"/></svg>History</a>
+      <a href="#"><svg class="ic"><use href="#i-crown"/></svg>Premium</a>
+      <a href="#"><svg class="ic"><use href="#i-gear"/></svg>Settings</a>
+    </nav>
+  </section>
+
+  <!-- ============ 05 · MORE INFO ============ -->
+  <section class="phone">
+    <div class="sbar"><span>9:41</span><span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.6" width="3" height="8.4" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.6a9.6 9.6 0 0 1 13 0"/><path d="M3.4 6.2a6 6 0 0 1 8.2 0"/><path d="M5.8 8.7a2.5 2.5 0 0 1 3.4 0"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11" fill="none"><rect x=".6" y=".6" width="18.8" height="9.8" rx="2.6" stroke="currentColor" stroke-opacity=".55"/><rect x="2.4" y="2.4" width="13.6" height="6.2" rx="1.6" fill="currentColor"/><path d="M21 4.2v2.6c1.2-.3 1.2-2.3 0-2.6z" fill="currentColor" fill-opacity=".6"/></svg>
+    </span></div>
+
+    <div class="topbar">
+      <span class="side"><svg class="ic"><use href="#i-back"/></svg></span>
+      <h2>More Info</h2>
+      <span class="side"></span>
+    </div>
+
+    <div class="body spread">
+      <div class="lrow"><span class="ib v"><svg class="ic"><use href="#i-hash"/></svg></span><span class="tx"><span class="t">Alternate Numbers</span><span class="s">2 Numbers Found</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib b"><svg class="ic"><use href="#i-link"/></svg></span><span class="tx"><span class="t">Social Profiles</span><span class="s">3 Profiles Found</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib t"><svg class="ic"><use href="#i-pin"/></svg></span><span class="tx"><span class="t">Address</span><span class="s">Lucknow, Uttar Pradesh</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib a"><svg class="ic"><use href="#i-users"/></svg></span><span class="tx"><span class="t">Family Members</span><span class="s">1 Member Found</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib g"><svg class="ic"><use href="#i-building"/></svg></span><span class="tx"><span class="t">Business Info</span><span class="s">No Business Info</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib g"><svg class="ic"><use href="#i-school"/></svg></span><span class="tx"><span class="t">Education</span><span class="s">Information Not Available</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib b"><svg class="ic"><use href="#i-car"/></svg></span><span class="tx"><span class="t">Vehicle Info</span><span class="s">UP 32 AB 1234</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib t"><svg class="ic"><use href="#i-vote"/></svg></span><span class="tx"><span class="t">Voter ID</span><span class="s">Information Not Available</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+      <div class="lrow"><span class="ib r"><svg class="ic"><use href="#i-id"/></svg></span><span class="tx"><span class="t">Aadhaar Verification</span><span class="s">Not Verified</span></span><span class="ch"><svg class="ic"><use href="#i-chevron"/></svg></span></div>
+    </div>
+  </section>
+
+  <!-- ============ 06 · PREMIUM ============ -->
+  <section class="phone">
+    <div class="sbar"><span>9:41</span><span class="r">
+      <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.6" y="5" width="3" height="6" rx="1"/><rect x="9.2" y="2.6" width="3" height="8.4" rx="1"/><rect x="13.8" y="0" width="3" height="11" rx="1"/></svg>
+      <svg width="15" height="11" viewBox="0 0 15 11" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 3.6a9.6 9.6 0 0 1 13 0"/><path d="M3.4 6.2a6 6 0 0 1 8.2 0"/><path d="M5.8 8.7a2.5 2.5 0 0 1 3.4 0"/></svg>
+      <svg width="23" height="11" viewBox="0 0 23 11" fill="none"><rect x=".6" y=".6" width="18.8" height="9.8" rx="2.6" stroke="currentColor" stroke-opacity=".55"/><rect x="2.4" y="2.4" width="13.6" height="6.2" rx="1.6" fill="currentColor"/><path d="M21 4.2v2.6c1.2-.3 1.2-2.3 0-2.6z" fill="currentColor" fill-opacity=".6"/></svg>
+    </span></div>
+
+    <div class="topbar">
+      <span class="side"><svg class="ic"><use href="#i-crown"/></svg></span>
+      <h2>Premium</h2>
+      <span class="side"></span>
+    </div>
+
+    <div class="body">
+      <div class="prem">
+        <h3>Go Premium</h3>
+        <p>Unlock all premium features and get unlimited access</p>
+        <svg class="gem" viewBox="0 0 64 64" fill="none">
+          <defs>
+            <linearGradient id="gemg" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#ffe27a"/><stop offset=".5" stop-color="#f7c531"/><stop offset="1" stop-color="#d99b12"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 6h24l14 16-26 36L6 22z" fill="url(#gemg)"/>
+          <path d="M20 6 6 22h52L44 6z" fill="#fff6d0" fill-opacity=".42"/>
+          <path d="M6 22h52L32 58z" fill="#fff" fill-opacity=".10"/>
+        </svg>
+        <div class="up">Upgrade Now</div>
+      </div>
+
+      <p class="h-sec">Premium Features</p>
+      <div class="feats">
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>Unlimited Searches</div>
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>Full Email Access</div>
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>Alternate Numbers</div>
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>Social Media Profiles</div>
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>Address &amp; Family Info</div>
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>No Ads</div>
+        <div class="feat"><span class="ck"><svg class="ic"><use href="#i-check"/></svg></span>Priority Support</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="#"><svg class="ic"><use href="#i-home"/></svg>Home</a>
+      <a href="#"><svg class="ic"><use href="#i-clock"/></svg>History</a>
+      <a class="on" href="#"><svg class="ic"><use href="#i-crown"/></svg>Premium</a>
+      <a href="#"><svg class="ic"><use href="#i-gear"/></svg>Settings</a>
+    </nav>
+  </section>
+
+</main>
+
+<p class="foot">CrimeTrack &mdash; UI prototype &middot; all names, numbers and records shown are placeholder sample data.<br><code>crimetrack-app-prototype.html</code></p>
+
+</body>
+</html>
