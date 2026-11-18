@@ -8,23 +8,32 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.crimetrack.app.data.HistoryItem
 import com.crimetrack.app.data.Lookup
-import com.crimetrack.app.data.NumberRecord
+import com.crimetrack.app.data.NumberInfo
+import com.crimetrack.app.data.PhoneUtil
+import com.crimetrack.app.data.RemoteLookup
+import com.crimetrack.app.data.Report
 import com.crimetrack.app.data.Store
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.UUID
 
-/** App ki screens. Bottom bar inhi me se 4 dikhata hai. */
-enum class Screen { Home, Result, Details, MoreInfo, History, Premium, Settings }
+enum class Screen { Home, Result, Details, MoreInfo, History, Premium, Settings, Report }
+
+data class Stats(val reports: Int = 0, val numbers: Int = 0)
 
 data class UiState(
     val screen: Screen = Screen.Home,
     val query: String = "",
     val searching: Boolean = false,
-    val record: NumberRecord? = null,
+    val info: NumberInfo? = null,
     val history: List<HistoryItem> = emptyList(),
     val premium: Boolean = false,
     val darkTheme: Boolean = true,
-    val demoMode: Boolean = true,
+    val serverUrl: String = "",
+    val apiKey: String = "",
+    val stats: Stats = Stats(),
     val message: String? = null
 )
 
@@ -34,70 +43,113 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
     private val backStack = ArrayDeque<Screen>()
 
     var state by mutableStateOf(
-        UiState(
-            history = store.history(),
-            premium = store.premium,
-            darkTheme = store.darkTheme,
-            demoMode = store.demoMode
-        )
+        run {
+            val (reports, numbers) = store.stats()
+            UiState(
+                history = store.history(),
+                premium = store.premium,
+                darkTheme = store.darkTheme,
+                serverUrl = store.serverUrl,
+                apiKey = store.apiKey,
+                stats = Stats(reports, numbers)
+            )
+        }
     )
         private set
 
     // ---------- search ----------
 
     fun onQueryChange(value: String) {
-        val digits = value.filter { it.isDigit() }.take(10)
-        state = state.copy(query = digits)
+        state = state.copy(query = PhoneUtil.digitsOnly(value))
     }
 
     fun search() {
         val number = state.query
-        if (number.length != 10 || number.first() !in '6'..'9') {
-            state = state.copy(message = "10 digit ka sahi mobile number daalein (6-9 se shuru)")
+        if (number.length != 10) {
+            state = state.copy(message = "10 digit ka mobile number daalein")
             return
         }
         if (state.searching) return
-
         state = state.copy(searching = true, message = null)
         viewModelScope.launch {
-            delay(650)
-            val record = Lookup.current.lookup(number)
-            val alreadySaved = state.history.firstOrNull { it.number == number }?.saved ?: false
-            val item = HistoryItem(
-                number = number,
-                name = record.name,
-                time = System.currentTimeMillis(),
-                saved = alreadySaved
-            )
-            val list = (listOf(item) + state.history.filter { it.number != number }).take(30)
+            val info = loadInfo(number)
+            if (!info.valid) {
+                state = state.copy(searching = false, message = "Ye valid Indian mobile number nahi lagta")
+                return@launch
+            }
+            delay(250)
+            val saved = state.history.firstOrNull { it.number == number }?.saved ?: false
+            val list = (listOf(HistoryItem(number, System.currentTimeMillis(), saved)) +
+                state.history.filter { it.number != number }).take(40)
             store.saveHistory(list)
             backStack.clear()
             state = state.copy(
                 searching = false,
-                record = record,
+                info = info,
                 history = list,
-                screen = Screen.Result,
-                query = ""
+                query = "",
+                screen = Screen.Result
             )
         }
     }
 
-    /** History ya suggestion chip se seedha record kholna. */
     fun openNumber(number: String) {
         viewModelScope.launch {
-            val record = Lookup.current.lookup(number)
-            val alreadySaved = state.history.firstOrNull { it.number == number }?.saved ?: false
-            val item = HistoryItem(number, record.name, System.currentTimeMillis(), alreadySaved)
-            val list = (listOf(item) + state.history.filter { it.number != number }).take(30)
+            val info = loadInfo(number)
+            val saved = state.history.firstOrNull { it.number == number }?.saved ?: false
+            val list = (listOf(HistoryItem(number, System.currentTimeMillis(), saved)) +
+                state.history.filter { it.number != number }).take(40)
             store.saveHistory(list)
             backStack.clear()
-            state = state.copy(record = record, history = list, screen = Screen.Result)
+            state = state.copy(info = info, history = list, screen = Screen.Result)
         }
     }
 
-    fun quickSearch(number: String) {
-        state = state.copy(query = number)
-        search()
+    private suspend fun loadInfo(number: String): NumberInfo {
+        val local = store.reportsFor(number)
+        val remote = if (store.serverUrl.isNotBlank()) {
+            withContext(Dispatchers.IO) { RemoteLookup.fetch(store.serverUrl, store.apiKey, number) }
+        } else {
+            emptyList()
+        }
+        val merged = (local + remote.filter { r -> local.none { it.id == r.id } })
+            .sortedByDescending { it.time }
+        return Lookup.build(number, merged)
+    }
+
+    // ---------- reports ----------
+
+    fun addReport(category: String, comment: String, reporter: String) {
+        val info = state.info ?: return
+        val report = Report(
+            id = UUID.randomUUID().toString(),
+            number = info.number,
+            category = category,
+            comment = comment.trim(),
+            reporter = reporter.trim(),
+            time = System.currentTimeMillis()
+        )
+        store.addReport(report)
+        refreshInfo()
+        state = state.copy(
+            screen = Screen.Details,
+            message = "Report save ho gayi — risk score update ho gaya",
+            stats = store.stats().let { Stats(it.first, it.second) }
+        )
+    }
+
+    fun deleteReport(id: String) {
+        store.deleteReport(id)
+        refreshInfo()
+        state = state.copy(
+            message = "Report delete ho gayi",
+            stats = store.stats().let { Stats(it.first, it.second) }
+        )
+    }
+
+    private fun refreshInfo() {
+        val info = state.info ?: return
+        state = state.copy(info = Lookup.build(info.number, store.reportsFor(info.number)))
     }
 
     // ---------- navigation ----------
@@ -118,32 +170,28 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         return if (previous != null) {
             state = state.copy(screen = previous)
             true
+        } else if (state.screen != Screen.Home) {
+            state = state.copy(screen = Screen.Home)
+            true
         } else {
-            if (state.screen != Screen.Home) {
-                state = state.copy(screen = Screen.Home)
-                true
-            } else {
-                false
-            }
+            false
         }
     }
 
     // ---------- saved / history ----------
 
     fun toggleSave() {
-        val record = state.record ?: return
-        val isSaved = state.history.firstOrNull { it.number == record.number }?.saved ?: false
-        val list = if (state.history.any { it.number == record.number }) {
-            state.history.map {
-                if (it.number == record.number) it.copy(saved = !isSaved) else it
-            }
+        val info = state.info ?: return
+        val isSaved = state.history.firstOrNull { it.number == info.number }?.saved ?: false
+        val list = if (state.history.any { it.number == info.number }) {
+            state.history.map { if (it.number == info.number) it.copy(saved = !isSaved) else it }
         } else {
-            listOf(HistoryItem(record.number, record.name, System.currentTimeMillis(), true)) + state.history
+            listOf(HistoryItem(info.number, System.currentTimeMillis(), true)) + state.history
         }
         store.saveHistory(list)
         state = state.copy(
             history = list,
-            message = if (isSaved) "Contact se hata diya" else "Contacts me save ho gaya"
+            message = if (isSaved) "Saved se hata diya" else "Saved list me add ho gaya"
         )
     }
 
@@ -161,7 +209,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         state = state.copy(history = emptyList(), message = "Poori history clear ho gayi")
     }
 
-    // ---------- premium / settings ----------
+    // ---------- settings ----------
 
     fun upgrade() {
         store.premium = true
@@ -173,25 +221,48 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         state = state.copy(darkTheme = value)
     }
 
-    fun setDemoMode(value: Boolean) {
-        store.demoMode = value
-        state = state.copy(demoMode = value)
+    fun setServerUrl(value: String) {
+        store.serverUrl = value
+        state = state.copy(serverUrl = value)
+    }
+
+    fun setApiKey(value: String) {
+        store.apiKey = value
+        state = state.copy(apiKey = value)
+    }
+
+    fun testServer() {
+        val url = state.serverUrl
+        if (url.isBlank()) {
+            state = state.copy(message = "Pehle API URL daalein")
+            return
+        }
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) { RemoteLookup.fetch(url, state.apiKey, "9876543210") }
+            state = state.copy(
+                message = if (result.isEmpty()) "Server se koi report nahi mili (URL/response check karein)" else result.size.toString() + " reports mili — connection theek hai"
+            )
+        }
     }
 
     fun clearAllData() {
         store.clearAll()
         backStack.clear()
         state = UiState(
+            screen = Screen.Home,
             history = emptyList(),
             premium = false,
             darkTheme = true,
-            demoMode = true,
-            screen = Screen.Home,
-            message = "Saara local data clear ho gaya"
+            serverUrl = "",
+            apiKey = "",
+            stats = Stats(),
+            message = "Saara data clear ho gaya"
         )
     }
 
     fun clearMessage() {
         state = state.copy(message = null)
     }
+
+    fun reportsJson(): String = store.reportsJson()
 }

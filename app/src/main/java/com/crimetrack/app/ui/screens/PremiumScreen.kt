@@ -44,19 +44,18 @@ import com.crimetrack.app.ui.theme.Green
 import com.crimetrack.app.ui.theme.GreenInk
 
 private val features = listOf(
-    "Unlimited Searches",
-    "Full Email Access",
-    "Alternate Numbers",
-    "Social Media Profiles",
-    "Address & Family Info",
+    "Unlimited number checks",
+    "Report history export",
+    "Risk score breakdown",
+    "Server sync (apna API)",
     "No Ads",
     "Priority Support"
 )
 
-/** Screen 6 — Premium. */
 @Composable
 fun PremiumScreen(vm: AppViewModel) {
     val premium = vm.state.premium
+    val stats = vm.state.stats
     var showDialog by remember { mutableStateOf(false) }
 
     Column(
@@ -67,9 +66,7 @@ fun PremiumScreen(vm: AppViewModel) {
     ) {
         TopBar(
             title = "Premium",
-            trailing = {
-                Icon(Icons.Filled.WorkspacePremium, contentDescription = null, tint = Green, modifier = Modifier.size(20.dp))
-            }
+            trailing = { Icon(Icons.Filled.WorkspacePremium, null, tint = Green, modifier = Modifier.size(20.dp)) }
         )
         Spacer(Modifier.height(4.dp))
 
@@ -90,12 +87,7 @@ fun PremiumScreen(vm: AppViewModel) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Icon(
-                        Icons.Filled.WorkspacePremium,
-                        contentDescription = null,
-                        tint = Amber,
-                        modifier = Modifier.size(56.dp)
-                    )
+                    Icon(Icons.Filled.WorkspacePremium, null, tint = Amber, modifier = Modifier.size(56.dp))
                 }
                 Spacer(Modifier.height(14.dp))
                 Button(
@@ -109,13 +101,15 @@ fun PremiumScreen(vm: AppViewModel) {
                         .fillMaxWidth()
                         .height(40.dp)
                 ) {
-                    Text(
-                        text = if (premium) "Premium Active" else "Upgrade Now",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(if (premium) "Premium Active" else "Upgrade Now", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 }
             }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+            StatCard("Reports", stats.reports.toString(), Modifier.weight(1f))
+            StatCard("Numbers", stats.numbers.toString(), Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(18.dp))
@@ -127,7 +121,7 @@ fun PremiumScreen(vm: AppViewModel) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(shape = RoundedCornerShape(5.dp), color = Green.copy(alpha = 0.16f), modifier = Modifier.size(17.dp)) {
                         Box(contentAlignment = Alignment.Center) {
-                            Icon(Icons.Filled.Check, contentDescription = null, tint = Green, modifier = Modifier.size(11.dp))
+                            Icon(Icons.Filled.Check, null, tint = Green, modifier = Modifier.size(11.dp))
                         }
                     }
                     Spacer(Modifier.width(9.dp))
@@ -142,16 +136,29 @@ fun PremiumScreen(vm: AppViewModel) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
             title = { Text("Premium (demo)") },
-            text = { Text("Ye ek demo upgrade hai — abhi koi payment nahi hota. Aap apna billing / Google Play subscription baad me jod sakte hain.") },
+            text = { Text("Ye demo upgrade hai — koi payment nahi hota. Google Play billing baad me jod sakte hain.") },
             confirmButton = {
                 TextButton(onClick = {
                     vm.upgrade()
                     showDialog = false
                 }) { Text("Unlock karein") }
             },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) { Text("Baad me") }
-            }
+            dismissButton = { TextButton(onClick = { showDialog = false }) { Text("Baad me") } }
         )
+    }
+}
+
+@Composable
+private fun StatCard(label: String, value: String, modifier: Modifier = Modifier) {
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        modifier = modifier
+    ) {
+        Column(Modifier.padding(12.dp)) {
+            Text(value, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Green)
+            Text(label, fontSize = 10.5.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }

@@ -37,16 +37,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.crimetrack.app.data.HistoryItem
+import com.crimetrack.app.data.PhoneUtil
+import com.crimetrack.app.data.formatDate
 import com.crimetrack.app.ui.AppViewModel
 import com.crimetrack.app.ui.components.Avatar
 import com.crimetrack.app.ui.components.Segmented
 import com.crimetrack.app.ui.components.TopBar
 import com.crimetrack.app.ui.theme.Green
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-/** Screen 4 — History (All / Viewed / Saved). */
 @Composable
 fun HistoryScreen(vm: AppViewModel) {
     val history = vm.state.history
@@ -54,7 +52,6 @@ fun HistoryScreen(vm: AppViewModel) {
     var confirmClear by remember { mutableStateOf(false) }
 
     val shown: List<HistoryItem> = when (filter) {
-        1 -> history
         2 -> history.filter { it.saved }
         else -> history
     }
@@ -75,18 +72,13 @@ fun HistoryScreen(vm: AppViewModel) {
         )
 
         Spacer(Modifier.height(4.dp))
-        Segmented(listOf("All", "Viewed", "Saved"), filter) { filter = it }
+        Segmented(listOf("All", "Recent", "Saved"), filter) { filter = it }
         Spacer(Modifier.height(14.dp))
 
         if (shown.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(240.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(Modifier.fillMaxWidth().height(220.dp), contentAlignment = Alignment.Center) {
                 Text(
-                    text = "Abhi koi search nahi hai.\nHome se number search karein.",
+                    text = "Abhi koi search nahi hai.\nHome se number check karein.",
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -95,11 +87,7 @@ fun HistoryScreen(vm: AppViewModel) {
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
                 shown.forEach { item ->
-                    HistoryRow(
-                        item = item,
-                        onOpen = { vm.openNumber(item.number) },
-                        onDelete = { vm.removeHistory(item.number) }
-                    )
+                    HistoryRow(item, onOpen = { vm.openNumber(item.number) }, onDelete = { vm.removeHistory(item.number) })
                 }
             }
         }
@@ -110,16 +98,14 @@ fun HistoryScreen(vm: AppViewModel) {
         AlertDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text("History clear karein?") },
-            text = { Text("Poori search history delete ho jayegi. Saved contacts bhi hat jayenge.") },
+            text = { Text("Poori search history delete ho jayegi. Saved numbers bhi hat jayenge (reports rehti hain).") },
             confirmButton = {
                 TextButton(onClick = {
                     vm.clearHistory()
                     confirmClear = false
                 }) { Text("Clear") }
             },
-            dismissButton = {
-                TextButton(onClick = { confirmClear = false }) { Text("Cancel") }
-            }
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Cancel") } }
         )
     }
 }
@@ -138,42 +124,25 @@ private fun HistoryRow(item: HistoryItem, onOpen: () -> Unit, onDelete: () -> Un
             modifier = Modifier.padding(start = 11.dp, end = 4.dp, top = 9.dp, bottom = 9.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Avatar(name = item.name, size = 34.dp)
+            Avatar(name = item.number, size = 34.dp)
             Spacer(Modifier.width(11.dp))
             Column(Modifier.weight(1f)) {
+                Text(PhoneUtil.national(item.number), fontSize = 12.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    text = "+91 " + item.number,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = item.name + (if (item.saved) "  ·  Saved" else ""),
+                    text = if (item.saved) "Saved" else "Checked",
                     fontSize = 10.5.sp,
                     color = if (item.saved) Green else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
-                text = formatTime(item.time),
-                fontSize = 9.5.sp,
+                text = formatDate(item.time),
+                fontSize = 9.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.End
             )
             IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
-                Icon(
-                    Icons.Filled.Delete,
-                    contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(15.dp)
-                )
+                Icon(Icons.Filled.Delete, "Delete", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(15.dp))
             }
         }
-    }
-}
-
-private fun formatTime(millis: Long): String {
-    return try {
-        SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()).format(Date(millis))
-    } catch (e: Exception) {
-        "—"
     }
 }

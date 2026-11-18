@@ -13,6 +13,7 @@ import com.crimetrack.app.ui.screens.HistoryScreen
 import com.crimetrack.app.ui.screens.HomeScreen
 import com.crimetrack.app.ui.screens.MoreInfoScreen
 import com.crimetrack.app.ui.screens.PremiumScreen
+import com.crimetrack.app.ui.screens.ReportScreen
 import com.crimetrack.app.ui.screens.ResultScreen
 import com.crimetrack.app.ui.screens.SettingsScreen
 
@@ -45,6 +46,7 @@ fun CrimeTrackApp(vm: AppViewModel) {
                 Screen.History -> HistoryScreen(vm)
                 Screen.Premium -> PremiumScreen(vm)
                 Screen.Settings -> SettingsScreen(vm)
+                Screen.Report -> ReportScreen(vm)
             }
         }
     }

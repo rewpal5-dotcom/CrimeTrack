@@ -13,8 +13,8 @@ import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.HowToVote
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Share
@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.crimetrack.app.data.MoreInfoItem
@@ -36,20 +37,17 @@ import com.crimetrack.app.ui.components.TopBar
 import com.crimetrack.app.ui.theme.Amber
 import com.crimetrack.app.ui.theme.Blue
 import com.crimetrack.app.ui.theme.Green
-import com.crimetrack.app.ui.theme.Red
 import com.crimetrack.app.ui.theme.Teal
 import com.crimetrack.app.ui.theme.TileAmber
 import com.crimetrack.app.ui.theme.TileBlue
 import com.crimetrack.app.ui.theme.TileGreen
-import com.crimetrack.app.ui.theme.TileRed
 import com.crimetrack.app.ui.theme.TileTeal
 import com.crimetrack.app.ui.theme.TileViolet
 import com.crimetrack.app.ui.theme.Violet
 
-/** Screen 5 — More Info list. */
 @Composable
 fun MoreInfoScreen(vm: AppViewModel) {
-    val record = vm.state.record ?: return
+    val info = vm.state.info ?: return
     var selected by remember { mutableStateOf<MoreInfoItem?>(null) }
 
     Column(
@@ -62,7 +60,7 @@ fun MoreInfoScreen(vm: AppViewModel) {
         Spacer(Modifier.height(4.dp))
 
         Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
-            record.moreInfo.forEachIndexed { index, item ->
+            info.moreInfo.forEachIndexed { index, item ->
                 val style = styleFor(index)
                 ListRow(
                     icon = iconFor(item.icon),
@@ -83,9 +81,7 @@ fun MoreInfoScreen(vm: AppViewModel) {
             onDismissRequest = { selected = null },
             title = { Text(current.title) },
             text = { Text(current.subtitle) },
-            confirmButton = {
-                TextButton(onClick = { selected = null }) { Text("Band karein") }
-            }
+            confirmButton = { TextButton(onClick = { selected = null }) { Text("Band karein") } }
         )
     }
 }
@@ -102,12 +98,10 @@ private fun iconFor(key: String): ImageVector = when (key) {
     else -> Icons.Filled.Fingerprint
 }
 
-private fun styleFor(index: Int): Pair<androidx.compose.ui.graphics.Color, androidx.compose.ui.graphics.Color> {
-    return when (index % 5) {
-        0 -> Violet to TileViolet
-        1 -> Blue to TileBlue
-        2 -> Teal to TileTeal
-        3 -> Amber to TileAmber
-        else -> Green to TileGreen
-    }
+private fun styleFor(index: Int): Pair<Color, Color> = when (index % 5) {
+    0 -> Violet to TileViolet
+    1 -> Blue to TileBlue
+    2 -> Teal to TileTeal
+    3 -> Amber to TileAmber
+    else -> Green to TileGreen
 }

@@ -18,14 +18,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -39,7 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crimetrack.app.data.NumberRecord
+import com.crimetrack.app.data.NumberInfo
+import com.crimetrack.app.data.formatDate
 import com.crimetrack.app.ui.AppViewModel
 import com.crimetrack.app.ui.Screen
 import com.crimetrack.app.ui.components.Avatar
@@ -47,6 +45,7 @@ import com.crimetrack.app.ui.components.InfoTile
 import com.crimetrack.app.ui.components.SectionTitle
 import com.crimetrack.app.ui.components.TopBar
 import com.crimetrack.app.ui.theme.Amber
+import com.crimetrack.app.ui.theme.Blue
 import com.crimetrack.app.ui.theme.Green
 import com.crimetrack.app.ui.theme.GreenInk
 import com.crimetrack.app.ui.theme.Red
@@ -59,10 +58,9 @@ import com.crimetrack.app.ui.theme.TileViolet
 import com.crimetrack.app.ui.theme.Teal
 import com.crimetrack.app.ui.theme.Violet
 
-/** Screen 2 — Quick Overview. */
 @Composable
 fun ResultScreen(vm: AppViewModel) {
-    val record = vm.state.record ?: return
+    val info = vm.state.info ?: return
 
     Column(
         modifier = Modifier
@@ -72,9 +70,7 @@ fun ResultScreen(vm: AppViewModel) {
     ) {
         TopBar(
             title = "CrimeTrack",
-            trailing = {
-                Icon(Icons.Filled.Shield, contentDescription = null, tint = Green, modifier = Modifier.size(20.dp))
-            }
+            trailing = { Icon(Icons.Filled.Shield, null, tint = Green, modifier = Modifier.size(20.dp)) }
         )
 
         Surface(
@@ -82,12 +78,9 @@ fun ResultScreen(vm: AppViewModel) {
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
-            Row(
-                modifier = Modifier.padding(6.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(Modifier.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "+91 " + record.number,
+                    text = info.international,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
@@ -102,7 +95,7 @@ fun ResultScreen(vm: AppViewModel) {
                         .clickable { vm.go(Screen.Home) }
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Filled.Search, contentDescription = null, tint = GreenInk, modifier = Modifier.size(20.dp))
+                        Icon(Icons.Filled.Search, null, tint = GreenInk, modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -112,38 +105,38 @@ fun ResultScreen(vm: AppViewModel) {
         SectionTitle("Quick Overview")
         Spacer(Modifier.height(10.dp))
 
-        ProfileCard(record = record, showStatus = false)
+        ProfileCard(info = info, showStatus = false)
 
         Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                InfoTile("Name", record.name, Icons.Filled.Person, Green, TileGreen, Modifier.weight(1f)) {
+                InfoTile("Status", if (info.valid) "Valid number" else "Invalid", Icons.Filled.CheckCircle, Green, TileGreen, Modifier.weight(1f)) {
                     vm.go(Screen.Details)
                 }
-                InfoTile("Email", record.email, Icons.Filled.Email, Amber, TileAmber, Modifier.weight(1f)) {
-                    vm.go(Screen.Details)
-                }
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                InfoTile("Location", record.location, Icons.Filled.Place, Teal, TileTeal, Modifier.weight(1f)) {
-                    vm.go(Screen.Details)
-                }
-                InfoTile("Operator", record.operator, Icons.Filled.Call, Violet, TileViolet, Modifier.weight(1f)) {
+                InfoTile("Type", info.type, Icons.Filled.Call, Violet, TileViolet, Modifier.weight(1f)) {
                     vm.go(Screen.Details)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                InfoTile("Circle", record.circle, Icons.Filled.Place, com.crimetrack.app.ui.theme.Blue, TileBlue, Modifier.weight(1f)) {
+                InfoTile("Region", info.region, Icons.Filled.Place, Teal, TileTeal, Modifier.weight(1f)) {
                     vm.go(Screen.Details)
                 }
-                InfoTile("WhatsApp", record.whatsapp, Icons.Filled.Send, Green, TileGreen, Modifier.weight(1f)) {
+                InfoTile("Reports", info.reportCount.toString() + " reports", Icons.Filled.Email, Amber, TileAmber, Modifier.weight(1f)) {
                     vm.go(Screen.Details)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                InfoTile("Risk Score", record.riskScore, Icons.Filled.Warning, Red, TileRed, Modifier.weight(1f)) {
+                InfoTile("Risk Score", info.riskLabel, Icons.Filled.Warning, Red, TileRed, Modifier.weight(1f)) {
                     vm.go(Screen.Details)
                 }
-                InfoTile("Caller ID", record.callerId, Icons.Filled.Phone, Red, TileRed, Modifier.weight(1f)) {
+                InfoTile("Top Category", info.topCategory, Icons.Filled.Shield, Blue, TileBlue, Modifier.weight(1f)) {
+                    vm.go(Screen.Details)
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
+                InfoTile("Last Report", formatDate(info.lastReport), Icons.Filled.Email, Green, TileGreen, Modifier.weight(1f)) {
+                    vm.go(Screen.Details)
+                }
+                InfoTile("Format", info.national, Icons.Filled.Place, Amber, TileAmber, Modifier.weight(1f)) {
                     vm.go(Screen.Details)
                 }
             }
@@ -164,59 +157,38 @@ fun ResultScreen(vm: AppViewModel) {
     }
 }
 
-/** Profile card — Result aur Details dono screens par. */
 @Composable
-internal fun ProfileCard(record: NumberRecord, showStatus: Boolean) {
+internal fun ProfileCard(info: NumberInfo, showStatus: Boolean) {
+    val title = if (info.knownName.isNotBlank()) info.knownName else "Number " + info.national
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Avatar(name = record.name, size = 52.dp)
+        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Avatar(name = title, size = 52.dp)
             Spacer(Modifier.width(13.dp))
             Column {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = record.name,
-                        fontSize = 14.5.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (record.verified) {
-                        Spacer(Modifier.width(5.dp))
-                        Icon(
-                            Icons.Filled.Verified,
-                            contentDescription = "Verified",
-                            tint = Green,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
+                Text(title, fontSize = 14.5.sp, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text = "+91 " + record.number,
+                    text = info.international,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f)
                 )
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text = record.operator + " · " + record.location,
+                    text = info.reportCount.toString() + " community reports · " + info.region,
                     fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (showStatus) {
                     Spacer(Modifier.height(7.dp))
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = Green.copy(alpha = 0.16f)
-                    ) {
+                    Surface(shape = RoundedCornerShape(50), color = Green.copy(alpha = 0.16f)) {
                         Text(
-                            text = record.status,
+                            text = info.riskLabel,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             color = Green,

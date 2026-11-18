@@ -23,12 +23,14 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +50,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.crimetrack.app.data.DemoData
+import com.crimetrack.app.data.PhoneUtil
 import com.crimetrack.app.ui.AppViewModel
 import com.crimetrack.app.ui.theme.Amber
 import com.crimetrack.app.ui.theme.Blue
@@ -61,7 +63,6 @@ import com.crimetrack.app.ui.theme.TileGreen
 import com.crimetrack.app.ui.theme.TileViolet
 import com.crimetrack.app.ui.theme.Violet
 
-/** Screen 1 — Home / number search. */
 @Composable
 fun HomeScreen(vm: AppViewModel) {
     val state = vm.state
@@ -72,26 +73,15 @@ fun HomeScreen(vm: AppViewModel) {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(Modifier.height(22.dp))
+        Spacer(Modifier.height(20.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Text(
-                text = "Crime",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-1).sp
-            )
-            Text(
-                text = "Track",
-                fontSize = 34.sp,
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = (-1).sp,
-                color = Green
-            )
+            Text("Crime", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-1).sp)
+            Text("Track", fontSize = 34.sp, fontWeight = FontWeight.ExtraBold, letterSpacing = (-1).sp, color = Green)
         }
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Find information about any mobile number",
+            text = "Number check karein — reports, risk score aur details",
             fontSize = 12.5.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -101,38 +91,30 @@ fun HomeScreen(vm: AppViewModel) {
         HeroArt()
 
         SearchBox(vm)
+        Spacer(Modifier.height(8.dp))
+        ValidationHint(state.query)
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(10.dp))
         Row(
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Filled.Lock,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(12.dp)
-            )
+            Icon(Icons.Filled.Lock, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(12.dp))
             Spacer(Modifier.width(6.dp))
             Text(
-                text = "Your search is 100% secure",
-                fontSize = 11.sp,
+                text = "Aapke reports sirf is device par save hote hain",
+                fontSize = 10.5.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
         if (state.history.isNotEmpty()) {
-            Spacer(Modifier.height(26.dp))
-            Text(
-                text = "Recent searches",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Spacer(Modifier.height(24.dp))
+            Text("Recent searches", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(10.dp))
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                state.history.take(3).forEach { item ->
+                state.history.take(4).forEach { item ->
                     Surface(
                         shape = RoundedCornerShape(12.dp),
                         color = MaterialTheme.colorScheme.surface,
@@ -146,34 +128,46 @@ fun HomeScreen(vm: AppViewModel) {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "+91 " + item.number,
+                                text = PhoneUtil.national(item.number),
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 modifier = Modifier.weight(1f)
                             )
-                            Text(
-                                text = item.name,
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            if (item.saved) {
+                                Text("Saved", fontSize = 10.sp, color = Green, fontWeight = FontWeight.Bold)
+                            }
                         }
                     }
                 }
             }
         }
 
-        if (state.demoMode) {
-            Spacer(Modifier.height(22.dp))
-            Text(
-                text = "Demo database: " + DemoData.suggestions.take(2).joinToString(", "),
-                fontSize = 10.5.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+        Spacer(Modifier.height(28.dp))
+    }
+}
 
-        Spacer(Modifier.height(24.dp))
+@Composable
+private fun ValidationHint(query: String) {
+    if (query.isEmpty()) return
+    val valid = query.length == 10 && PhoneUtil.isValid(query)
+    val color = if (valid) Green else Amber
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = if (valid) Icons.Filled.CheckCircle else Icons.Filled.Warning,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(13.dp)
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(
+            text = when {
+                valid -> "Valid mobile number — " + PhoneUtil.regionName(query) + " (" + PhoneUtil.typeLabel(query) + ")"
+                query.length < 10 -> (10 - query.length).toString() + " digit baaki hain"
+                else -> "Ye valid Indian mobile number nahi lagta"
+            },
+            fontSize = 11.sp,
+            color = color
+        )
     }
 }
 
@@ -185,22 +179,9 @@ private fun SearchBox(vm: AppViewModel) {
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
-        Row(
-            modifier = Modifier.padding(6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "+91",
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 10.dp)
-            )
-            Box(
-                Modifier
-                    .width(1.dp)
-                    .height(24.dp)
-                    .background(MaterialTheme.colorScheme.outline)
-            )
+        Row(Modifier.padding(6.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("+91", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 10.dp))
+            Box(Modifier.width(1.dp).height(24.dp).background(MaterialTheme.colorScheme.outline))
             BasicTextField(
                 value = state.query,
                 onValueChange = vm::onQueryChange,
@@ -211,10 +192,7 @@ private fun SearchBox(vm: AppViewModel) {
                     fontWeight = FontWeight.Medium
                 ),
                 cursorBrush = SolidColor(Green),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number,
-                    imeAction = ImeAction.Search
-                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(onSearch = { vm.search() }),
                 modifier = Modifier
                     .weight(1f)
@@ -222,11 +200,7 @@ private fun SearchBox(vm: AppViewModel) {
                 decorationBox = { innerTextField ->
                     Box {
                         if (state.query.isEmpty()) {
-                            Text(
-                                text = "Enter mobile number",
-                                fontSize = 13.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Text("Enter mobile number", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         innerTextField()
                     }
@@ -241,18 +215,9 @@ private fun SearchBox(vm: AppViewModel) {
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (state.searching) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            color = GreenInk,
-                            strokeWidth = 2.dp
-                        )
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), color = GreenInk, strokeWidth = 2.dp)
                     } else {
-                        Icon(
-                            Icons.Filled.Search,
-                            contentDescription = "Search",
-                            tint = GreenInk,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Icon(Icons.Filled.Search, "Search", tint = GreenInk, modifier = Modifier.size(20.dp))
                     }
                 }
             }
@@ -265,37 +230,29 @@ private fun HeroArt() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp),
+            .height(236.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(
             Modifier
-                .size(220.dp)
-                .background(
-                    Brush.radialGradient(listOf(Green.copy(alpha = 0.18f), Color.Transparent)),
-                    CircleShape
-                )
+                .size(210.dp)
+                .background(Brush.radialGradient(listOf(Green.copy(alpha = 0.18f), Color.Transparent)), CircleShape)
         )
         Surface(
             shape = RoundedCornerShape(20.dp),
             color = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            modifier = Modifier.size(width = 128.dp, height = 200.dp)
+            modifier = Modifier.size(width = 124.dp, height = 192.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    Icons.Filled.Search,
-                    contentDescription = null,
-                    tint = Green,
-                    modifier = Modifier.size(56.dp)
-                )
+                Icon(Icons.Filled.Search, null, tint = Green, modifier = Modifier.size(54.dp))
             }
         }
-        Chip(Icons.Filled.Person, TileGreen, GreenLight, Modifier.align(Alignment.TopStart).offset(x = 4.dp, y = 30.dp))
-        Chip(Icons.Filled.Email, TileViolet, Violet, Modifier.align(Alignment.TopEnd).offset(x = (-4).dp, y = 44.dp))
-        Chip(Icons.Filled.Phone, TileBlue, Blue, Modifier.align(Alignment.CenterStart).offset(x = 2.dp, y = 34.dp))
-        Chip(Icons.Filled.Email, TileAmber, Amber, Modifier.align(Alignment.CenterEnd).offset(x = (-6).dp, y = 10.dp))
-        Chip(Icons.Filled.Place, TileGreen, GreenLight, Modifier.align(Alignment.BottomEnd).offset(x = (-34).dp, y = (-16).dp))
+        Chip(Icons.Filled.Person, TileGreen, GreenLight, Modifier.align(Alignment.TopStart).offset(x = 4.dp, y = 26.dp))
+        Chip(Icons.Filled.Email, TileViolet, Violet, Modifier.align(Alignment.TopEnd).offset(x = (-4).dp, y = 40.dp))
+        Chip(Icons.Filled.Phone, TileBlue, Blue, Modifier.align(Alignment.CenterStart).offset(x = 2.dp, y = 30.dp))
+        Chip(Icons.Filled.Warning, TileAmber, Amber, Modifier.align(Alignment.CenterEnd).offset(x = (-6).dp, y = 6.dp))
+        Chip(Icons.Filled.Place, TileGreen, GreenLight, Modifier.align(Alignment.BottomEnd).offset(x = (-32).dp, y = (-14).dp))
     }
 }
 
@@ -308,7 +265,7 @@ private fun Chip(icon: ImageVector, background: Color, tint: Color, modifier: Mo
         modifier = modifier.size(32.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(15.dp))
+            Icon(icon, null, tint = tint, modifier = Modifier.size(15.dp))
         }
     }
 }
